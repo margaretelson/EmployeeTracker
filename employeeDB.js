@@ -3,28 +3,24 @@ const fs = require('fs');
 const mysql = require("mysql");
 const consoleTable = require("console.table");
 
-var roleArray = [];
-var managerArray = [];
+const roleArray = [];
+const managerArray = [];
 
 const connection = mysql.createConnection({
     host: "localhost",
     port: 8080,
     user: "root",
-    password: password,
+    password: "Dre525252",
     database: "employee_trackerDB"
 
 });
 
-connection.connect(function(){
-    if (error) throw error;
+const PORT = process.env.PORT || 8080;
+
+connection.connect(function(err){
+    if (err) throw err;
     startApp();
 })
-
-let newTeamProfile = []
-
-function createApp(){
-    teamMemPrompt()
-}
 
 
 function startApp(){
@@ -95,10 +91,6 @@ function addEmployee(){
     connection.query
 }
 
-function addRole(){
-    connection.query
-}
-
 function addDepartment(){
     connection.query
 }
@@ -106,12 +98,22 @@ function addDepartment(){
 //
 
 function chooseRole(){
-    connection.query
-}
+    connection.query("SELECT * FROM role", function(err, res){
+        if (err) throw err;
+        for (var i=0; i < res.length; i++){
+            roleArray.push(res[i].role)
+        }
+    })
+} return roleArray;
 
 function chooseManager(){
-    connection.query
-}
+    connection.query("SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", function(err, res){
+        if (err) throw err;
+        for (var i=0; i < res.length; i++){
+            managerArray.push(res[i].first_name,last_name)
+        }
+    })
+} return managerArray;
 
 function employeePrompt(){
     inquirer.prompt([
@@ -129,13 +131,13 @@ function employeePrompt(){
             type: 'list',
             name: 'role',
             message: 'What is the employees role?',
-            choices: chooseRole();
+            choices: chooseRole()
         },
         {
             type: 'rawlist',
             name: 'managerChoice',
             message: 'Who is their manager?',
-            choices: chooseManager();
+            choices: chooseManager()
         },
     ]).then(function(response){
         var roleValue = chooseRole();
@@ -148,79 +150,43 @@ function employeePrompt(){
             managerChoice: managerChoiceValue,
         }, function(error){
             if (error) throw console.error();
+            console.table(response);
             startApp();
         }
     })
 }    
+employeePrompt();
 
-// function addDepartment(){
-//     inquirer.prompt([
-//         {
-//             type: 'input',
-//             name: 'name',
-//             message: 'What is the name of the intern you are inputting?',
-//         },
-//         {
-//             type: 'input',
-//             name: 'ID',
-//             message: 'What is the employee ID of the intern?',
-//         },
-//         {
-//             type: 'input',
-//             name: 'email',
-//             message: 'What is the interns email?',
-//         },
-//         {
-//             type: 'input',
-//             name: 'internSchool',
-//             message: 'What school does the intern go to?',
-//         },
-//     ]).then(function(response){
-//         var name = response.name;
-//         var ID = response.ID;
-//         var email = response.email;
-//         var internSchool = response.internSchool
-//         const newTeamMem = new Intern(name, ID, email, internSchool);
-//         newTeamProfile.push(newTeamMem);
-//         teamMemPrompt();
-//     })
-// } 
-    
-//     function teamMemPrompt(){
-//         inquirer.prompt([
-//             {
-//                 type: 'list',
-//                 name: 'addMore',
-//                 message: 'Would you like to add a member to your team?',
-//                 choices: ['Add an Engineer.', 'Add an Intern.', 'Add a Manager.', 'No, my team is complete.']
-//             },
-//         ])
-//         .then(function (response) {
+function addRole(){
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'title',
+            message: 'What is the title of the employee?',
+        },
+        {
+            type: 'input',
+            name: 'salary',
+            message: 'What is the salary of the employee?',
+        },
+    ]).then(function(response){
+        connection.query("INSERT INTO department SET ?")
+    })
+}
 
-//             switch (response.addMore) {
-//                 case "Add an Engineer.":
-//                     engineerPrompt();
-//                     break;
+function addDepartment(){
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'dep_name',
+            message: 'What is the name of the department?',
+        },
+    ]).then(function(response){
+        connection.query("INSERT INTO role SET ?")
+    })
+}
 
-//                 case "Add an Intern.":
-//                     internPrompt();
-//                     break;
+app.listen(PORT, () =>
+  console.log(`Server listening on: http://localhost:${PORT}`)
+);
 
-//                 case "Add a Manager.":
-//                     managerPrompt();
-//                     break;
-
-//                 case "No, my team is complete.":
-//                     completeTeam();
-//                     break;
-//             }
-//         });
-//     }
-
-// function completeTeam() {
-//     console.log("Congratulations! You have a team.")
-    
-//     beginHTML()
-//     inputHTML();
-//     endHTML();
-// }
