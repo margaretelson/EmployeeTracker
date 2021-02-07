@@ -8,7 +8,7 @@ const managerArray = [];
 
 const connection = mysql.createConnection({
     host: "localhost",
-    port: 8080,
+    port: 3306,
     user: "root",
     password: "Dre525252",
     database: "employee_trackerDB"
@@ -27,19 +27,20 @@ function startApp(){
     inquirer.prompt([
         {
             type: 'list',
-            name: 'choices',
+            name: 'options',
             message: 'What would you like to do?',
             choices: [
                 "View all Employees",
                 "View Employees By Department",
                 "View Employees By Role",
                 "Update Employee",
+                "Add Employee",
                 "Add Role",
                 "Add Department",
+                "Quit",
             ]
-        }
-            ]).then(function(response){
-            switch (response.choice){
+        }.then(function(res){
+            switch (res.choice){
                 case "View All Employees":
                     allEmployees();
                 break; 
@@ -67,32 +68,56 @@ function startApp(){
                 case "Add Department":
                     addDepartment();
                 break;
+
+                default:
+                    quit();
             }
         })
 }
 
 function allEmployees(){
-    connection.query
+    connection.query,
+    function(err, res){
+        if (err) throw err
+        console.table(res)
+        startApp();
+    }
 }
 
 function employeeDepartment(){
-    connection.query
+    connection.query,
+    function(err, res){
+        if (err) throw err
+        console.table(res)
+        startApp();
+    }
 }
 
 function employeeRole(){
-    connection.query
+    connection.query,
+    function(err, res){
+        if (err) throw err
+        console.table(res)
+        startApp();
+    }
 }
 
 function updateEmployee(){
-    connection.query
+    connection.query,
+    function(err, res){
+        if (err) throw err
+        console.table(res)
+        startApp();
+    }
 }
 
 function addEmployee(){
-    connection.query
-}
-
-function addDepartment(){
-    connection.query
+    connection.query,
+    function(err, res){
+        if (err) throw err
+        console.table(res)
+        startApp();
+    }
 }
 
 //
@@ -139,18 +164,18 @@ function employeePrompt(){
             message: 'Who is their manager?',
             choices: chooseManager()
         },
-    ]).then(function(response){
+    ]).then(function(res){
         var roleValue = chooseRole();
         var managerChoiceValue = chooseManager();
         connection.query,
         {
-            firstName: response.firstName,
-            lastName: response.lastName,
+            firstName: res.firstName,
+            lastName: res.lastName,
             role: roleValue,
             managerChoice: managerChoiceValue,
         }, function(error){
             if (error) throw console.error();
-            console.table(response);
+            console.table(res);
             startApp();
         }
     })
@@ -169,8 +194,8 @@ function addRole(){
             name: 'salary',
             message: 'What is the salary of the employee?',
         },
-    ]).then(function(response){
-        connection.query("INSERT INTO department SET ?")
+    ]).then(function(res){
+        connection.query("INSERT INTO title_role SET ?")
     })
 }
 
@@ -181,9 +206,19 @@ function addDepartment(){
             name: 'dep_name',
             message: 'What is the name of the department?',
         },
-    ]).then(function(response){
-        connection.query("INSERT INTO role SET ?")
+    ]).then(function(res){
+        connection.query("INSERT INTO department SET ?",
+            { name: res.dep_name }, 
+            function(err){
+                if (err) throw err
+                console.table(res)
+                startApp();
+            })
     })
+}
+
+function quit(){
+    connection.end()
 }
 
 app.listen(PORT, () =>
