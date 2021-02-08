@@ -1,10 +1,12 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
+const util = require('util')
 const mysql = require("mysql");
 const consoleTable = require("console.table");
 
 const roleArray = [];
 const managerArray = [];
+
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -22,8 +24,11 @@ connection.connect(function(err){
     startApp();
 })
 
+getRoles();
 
-function startApp(){
+
+
+async function startApp(){
     inquirer.prompt([
         {
             type: 'list',
@@ -39,8 +44,9 @@ function startApp(){
                 "Add Department",
                 "Quit",
             ]
-        }.then(function(res){
-            switch (res.choice){
+        }
+    ]).then(function(res){
+            switch (res.options){
                 case "View All Employees":
                     allEmployees();
                 break; 
@@ -58,7 +64,7 @@ function startApp(){
                 break;
 
                 case "Add Employee":
-                    addEmployee()();
+                    addEmployee();
                 break;
 
                 case "Add Role":
@@ -76,7 +82,7 @@ function startApp(){
 }
 
 function allEmployees(){
-    connection.query,
+    connection.query("SELECT employee.first_name, employee.last_name, title_role.title, title_role.salary, department.dep_name AS Manager FROM employee INNER JOIN title_role on title_role.id = employee.role_id INNER JOIN department on department.id = title_role.department_id left join employee e on employee.manager_id = e.id;"),
     function(err, res){
         if (err) throw err
         console.table(res)
@@ -111,15 +117,6 @@ function updateEmployee(){
     }
 }
 
-function addEmployee(){
-    connection.query,
-    function(err, res){
-        if (err) throw err
-        console.table(res)
-        startApp();
-    }
-}
-
 //
 
 function chooseRole(){
@@ -135,12 +132,14 @@ function chooseManager(){
     connection.query("SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", function(err, res){
         if (err) throw err;
         for (var i=0; i < res.length; i++){
-            managerArray.push(res[i].first_name,last_name)
+            managerArray.push(res[i].first_name)
         }
     })
 } return managerArray;
 
-function employeePrompt(){
+async function addEmployee(){
+    var getTitles = getRoles();
+    console.log(getTitles)
     inquirer.prompt([
         {
             type: 'input',
@@ -156,13 +155,13 @@ function employeePrompt(){
             type: 'list',
             name: 'role',
             message: 'What is the employees role?',
-            choices: chooseRole()
+            choices: addRole
         },
         {
             type: 'rawlist',
             name: 'managerChoice',
             message: 'Who is their manager?',
-            choices: chooseManager()
+            choices: chooseManager
         },
     ]).then(function(res){
         var roleValue = chooseRole();
@@ -182,6 +181,16 @@ function employeePrompt(){
 }    
 employeePrompt();
 
+function getRoles(){
+    var titles = []
+    connection.query("SELECT title FROM title_role", function(err, res){
+        for (let i = 0; i < res.length; i++){
+            titles.push(res[i])
+        } 
+        return titles;
+    })
+}
+
 function addRole(){
     inquirer.prompt([
         {
@@ -195,7 +204,7 @@ function addRole(){
             message: 'What is the salary of the employee?',
         },
     ]).then(function(res){
-        connection.query("INSERT INTO title_role SET ?")
+        // connection.query("INSERT INTO title_role SET ?")
     })
 }
 
