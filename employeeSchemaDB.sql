@@ -3,46 +3,64 @@ CREATE database employee_trackerDB;
 
 USE employee_trackerDB;
 
-CREATE TABLE employee (
-  id INT AUTO_INCREMENT NOT NULL,
-  first_name VARCHAR(30) NOT NULL,
-  last_name VARCHAR(30),
-  role_id INT,
-  manager_id INT,
-  PRIMARY KEY (id)
+CREATE TABLE department (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(30) UNIQUE NOT NULL
 );
 
 CREATE TABLE title_role (
-  id INT AUTO_INCREMENT NOT NULL,
-  title VARCHAR(30),
-  salary DECIMAL(10,4) NULL,
-  department_id INT,
-  PRIMARY KEY (id)
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(30) UNIQUE NOT NULL,
+  salary DECIMAL UNSIGNED NOT NULL,
+  department_id INT UNSIGNED NOT NULL,
+  INDEX department_index (department_id),
+  CONSTRAINT department FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE CASCADE
 );
 
-CREATE TABLE department (
-  id INT AUTO_INCREMENT NOT NULL,
-  dep_name VARCHAR(30) NOT NULL,
-  PRIMARY KEY (id)
+CREATE TABLE employee (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(30) NOT NULL,
+  last_name VARCHAR(30) NOT NULL,
+  role_id INT UNSIGNED NOT NULL,
+  INDEX role_index (role_id),
+  CONSTRAINT title_role FOREIGN KEY (role_id) REFERENCES title_role(id) ON DELETE CASCADE,
+  manager_id INT UNSIGNED,
+  INDEX manager_index (manager_id),
+  CONSTRAINT manager FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
 );
 
-TRUNCATE employee;
-INSERT INTO employee(first_name, last_name, role_id) VALUES ("Margaret", "Elson", 1);
-INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES ("Johnny", "Appleseed", 2, 1);
-INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES ("Sam", "Smith", 3, 1);
-INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES ("Josh", "Brown", 4, 1);
+INSERT INTO department
+    (name)
+VALUES
+    ('HR'),
+    ('Finance'),
+    ('Sales'),
+    ('Engineering');
 
-TRUNCATE title_role;
-INSERT INTO title_role(title, salary, department_id) VALUES ("Recruiter", 45000, 1);
-INSERT INTO title_role(title, salary, department_id) VALUES ("Onboarding Specialist", 40000, 1);
-INSERT INTO title_role(title, salary, department_id) VALUES ("Full-Stack Engineer", 70000, 2);
-INSERT INTO title_role(title, salary, department_id) VALUES ("Lawyer", 90000, 3);
+INSERT INTO title_role
+    (title, salary, department_id)
+VALUES
+    ('Recruiter', 30000, 1),
+    ('Human Resource Consultant', 50000, 1),
+    ('Financial Analyst', 70000, 2),
+    ('Accountant', 75000, 2),
+    ('Sales Associate', 60000, 3),
+    ('Account Executive', 80000, 3),
+    ('Full Stack Engineer', 95000, 4),
+    ('Software Developer', 90000, 4);
 
-TRUNCATE department;
-INSERT INTO department(dep_name) VALUES ("Legal");
-INSERT INTO department(dep_name) VALUES ("HR");
-INSERT INTO department(dep_name) VALUES ("Dev");
-INSERT INTO department(dep_name) VALUES ("Sales");
+INSERT INTO employee
+    (first_name, last_name, role_id, manager_id)
+VALUES
+    ('Tony', 'Stark', 1, NULL),
+    ('Steve', 'Rogers', 2, NULL),
+    ('Peter', 'Parker', 3, 1),
+    ('Natasha', 'Romanova', 4, 2),
+    ('Bruce', 'Banner', 5, 1),
+    ('Stephen', 'Strange', 6, NULL),
+    ('Sam', 'Wilson', 7, 1),
+    ('Wanda', 'Maximoff', 8, 6);
+
 
 SELECT * FROM employee_trackerDB.employee;
 

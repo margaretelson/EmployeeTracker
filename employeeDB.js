@@ -129,17 +129,22 @@ function chooseRole(){
 } return roleArray;
 
 function chooseManager(){
-    connection.query("SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", function(err, res){
-        if (err) throw err;
-        for (var i=0; i < res.length; i++){
-            managerArray.push(res[i].first_name)
-        }
-    })
-} return managerArray;
+    return new Promise(function(resolve, reject){
+        connection.query("SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", function(err, res){
+            if (err) throw err;
+            for (var i=0; i < res.length; i++){
+                managerArray.push(res[i].first_name)
+            }
+            resolve(managerArray)
+        })
+    })  
+}
 
 async function addEmployee(){
-    var getTitles = getRoles();
+    var getTitles = await getRoles();
+    var managerNames = await chooseManager();
     console.log(getTitles)
+    console.log(managerNames)
     inquirer.prompt([
         {
             type: 'input',
@@ -155,39 +160,59 @@ async function addEmployee(){
             type: 'list',
             name: 'role',
             message: 'What is the employees role?',
-            choices: addRole
+            choices: getTitles
         },
         {
-            type: 'rawlist',
+            type: 'list',
             name: 'managerChoice',
             message: 'Who is their manager?',
-            choices: chooseManager
+            choices: managerNames
         },
-    ]).then(function(res){
-        var roleValue = chooseRole();
-        var managerChoiceValue = chooseManager();
-        connection.query,
-        {
-            firstName: res.firstName,
-            lastName: res.lastName,
-            role: roleValue,
-            managerChoice: managerChoiceValue,
-        }, function(error){
-            if (error) throw console.error();
-            console.table(res);
+    ]).then(async function(res){
+        console.log(res.firstName, res.lastName, res.role, res.managerChoice);
+        var roleID = await new Promise(function(resolve, reject){
+            connection.query("SELECT * FROM title_role WHERE title = ?", [res.role], function(err, res){
+            if (err) reject(err);
+            resolve(res[0].id);
+        })
+    })
+        var managerID = await new Promise(function(resolve, reject){
+            connection.query("SELECT * FROM employee WHERE first_name = ?", [res.managerChoice], function(err, res){
+            if (err) reject(err);
+            resolve(res[0].id);
+        })
+    })
+        console.log(managerID);
+        console.log(roleID)
+        connection.query(`INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES ("${res.firstName}", "${res.lastName}", "${roleID}", "${managerID}")`,
+        async function(err, res){
+            if (err) throw err;
+            var allEmployees = await getEmployees();
+            console.table(allEmployees);
             startApp();
-        }
+        })
     })
 }    
-employeePrompt();
 
 function getRoles(){
-    var titles = []
-    connection.query("SELECT title FROM title_role", function(err, res){
-        for (let i = 0; i < res.length; i++){
-            titles.push(res[i])
-        } 
-        return titles;
+    return new Promise(function(resolve, reject){
+        var titles = []
+        connection.query("SELECT title FROM title_role", function(err, res){
+            if(err) reject(err);
+            for (let i = 0; i < res.length; i++){
+                titles.push(res[i].title)
+            } 
+            resolve(titles);
+        })
+    })
+}
+
+function getEmployees(){
+    return new Promise(function (resolve, reject){
+        connection.query("SELECT * FROM employee", function(err, res){
+            if(err) reject(err);
+            resolve(res);
+        })
     })
 }
 
