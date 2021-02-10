@@ -15,7 +15,7 @@
 The Employee Tracker was created using sql and javascript, along with specific installations mentioned below. I think in the future it would be interesting to incorporate this application into a front end application that ca be used in the browser. At this moment the application is run solely through terminal.
 
 ## URL
-[Click here for a link to the demo video]()
+[Click here for a link to the demo video](https://drive.google.com/file/d/1-1N0y_eV-U8qzg3Sbmku4tX_1bxPYKMp/view?usp=sharing)
 
 
 ## Installation
