@@ -121,7 +121,6 @@ function updateEmployee(){
     }
 }
 
-//
 
 function chooseRole(){
     connection.query("SELECT * FROM role", function(err, res){
