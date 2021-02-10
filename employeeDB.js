@@ -1,8 +1,8 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 const util = require('util')
-const mysql = require("mysql");
-const consoleTable = require("console.table");
+const mysql = require('mysql');
+const cTable = require('console.table');
 
 const roleArray = [];
 const managerArray = [];
@@ -81,14 +81,18 @@ async function startApp(){
         })
 }
 
+
 function allEmployees(){
-    connection.query("SELECT employee.first_name, employee.last_name, title_role.title, title_role.salary, department.dep_name AS Manager FROM employee INNER JOIN title_role on title_role.id = employee.role_id INNER JOIN department on department.id = title_role.department_id left join employee e on employee.manager_id = e.id;"),
-    function(err, res){
-        if (err) throw err
-        console.table(res)
-        startApp();
-    }
+    console.log("working?")
+    return new Promise(function (resolve, reject){
+        connection.query("SELECT employee.first_name, employee.last_name FROM employee", function(err, res){
+            if(err) reject(err);
+            resolve(res);
+        })
+    })
 }
+
+
 
 function employeeDepartment(){
     connection.query,
